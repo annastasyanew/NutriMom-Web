@@ -233,9 +233,74 @@ def prepare_food_candidates(food_data):
         & (foods["sugar_g"] <= 40)
     ].copy()
 
+def apply_condition_based_food_filter(food_data, patient_data, fuzzy_scores):
+    """
+    Filter makanan berdasarkan kondisi maternal.
+    Tujuannya agar rekomendasi berubah sesuai profil risiko ibu.
+    """
+
+    df = food_data.copy()
+
+    glucose_risk = fuzzy_scores.get("glucose_risk", 0)
+    bp_risk = fuzzy_scores.get("bp_risk", 0)
+
+    bmi = patient_data.get("BMI", np.nan)
+
+    # Risiko gula tinggi: batasi gula
+    if glucose_risk >= 0.5:
+        df = df[df["sugar_g"] <= 8].copy()
+
+    if glucose_risk >= 0.75:
+        df = df[df["sugar_g"] <= 5].copy()
+
+    # Risiko tekanan darah tinggi: batasi sodium
+    if bp_risk >= 0.5:
+        df = df[df["sodium_mg"] <= 300].copy()
+
+    if bp_risk >= 0.75:
+        df = df[df["sodium_mg"] <= 150].copy()
+
+    # BMI tinggi: batasi kalori dan gula
+    if not pd.isna(bmi) and bmi >= 30:
+        df = df[
+            (df["calories"] <= 350) &
+            (df["sugar_g"] <= 10)
+        ].copy()
+
+    # BMI rendah: pilih makanan dengan energi dan protein cukup
+    if not pd.isna(bmi) and bmi < 18.5:
+        df = df[
+            (df["calories"] >= 100) &
+            (df["protein_g"] >= 3)
+        ].copy()
+
+    exclude_keywords = [
+        "alcohol", "beer", "wine", "liquor",
+        "candy", "soda", "soft drink",
+        "raw egg", "raw meat", "raw fish",
+        "supplement", "protein powder", "whey protein",
+        "meal replacement", "infant formula", "baby food"
+    ]
+
+    pattern = "|".join(exclude_keywords)
+
+    df = df[
+        ~df["food_name"].astype(str).str.lower().str.contains(pattern, na=False)
+    ].copy()
+
+    # Jika filter terlalu ketat, pakai data awal agar sistem tetap bisa memberi rekomendasi
+    if len(df) < 20:
+        return food_data.copy()
+
+    return df
 
 def rank_foods_saw(food_data, patient_data, fuzzy_scores, top_n=5):
     foods = prepare_food_candidates(food_data)
+    foods = apply_condition_based_food_filter(
+            foods,
+            patient_data,
+            fuzzy_scores
+        )
     weights = adaptive_food_weights(patient_data, fuzzy_scores)
     criteria_types = {
         "protein_g": "benefit",
@@ -303,10 +368,23 @@ def build_final_recommendation(prediction, dominant_factors, food_reason):
             "Model mendeteksi risiko maternal tinggi. Prioritaskan konsultasi dengan "
             "dokter atau bidan dan lakukan pemantauan kondisi secara lebih ketat."
         )
-    else:
+
+    elif prediction == "Mid Risk":
+        opening = (
+            "Model mendeteksi risiko maternal sedang. Lakukan pemantauan lanjutan "
+            "dan perhatikan faktor risiko yang dominan."
+        )
+
+    elif prediction == "Low Risk":
         opening = (
             "Model mendeteksi risiko maternal rendah. Tetap lakukan pemeriksaan "
             "kehamilan rutin dan pertahankan pola makan seimbang."
+        )
+
+    else:
+        opening = (
+            "Hasil prediksi belum dapat dikategorikan secara jelas. Lakukan pemeriksaan "
+            "ulang input dan konsultasikan kondisi kepada tenaga kesehatan."
         )
 
     if dominant_factors:
@@ -317,10 +395,10 @@ def build_final_recommendation(prediction, dominant_factors, food_reason):
 
     return (
         f"{opening}{factor_text} Rekomendasi makanan diprioritaskan berdasarkan "
-        f"kriteria {food_reason}."
+        f"kriteria {food_reason}. Sistem ini hanya alat bantu edukatif dan tidak "
+        f"menggantikan konsultasi dokter atau ahli gizi."
     )
-
-
+    
 def parse_patient_form(form):
     patient_data = {}
     errors = []
