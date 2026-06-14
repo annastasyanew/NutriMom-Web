@@ -169,11 +169,11 @@ def predict_risk(patient_data):
 
 def adaptive_food_weights(patient_data, fuzzy_scores):
     weights = {
-        "protein_g": 0.18,
-        "fiber_g": 0.18,
-        "iron_mg": 0.15,
-        "calcium_mg": 0.14,
-        "sugar_g": 0.13,
+        "protein_g": 0.15,
+        "fiber_g": 0.15,
+        "iron_mg": 0.13,
+        "calcium_mg": 0.13,
+        "sugar_g": 0.12,
         "sodium_mg": 0.12,
         "calories": 0.10,
     }
@@ -182,13 +182,22 @@ def adaptive_food_weights(patient_data, fuzzy_scores):
     glucose_risk = fuzzy_scores["glucose_risk"]
     bmi_risk = fuzzy_scores["bmi_risk"]
 
-    weights["sodium_mg"] += 0.16 * bp_risk
-    weights["sugar_g"] += 0.16 * glucose_risk
-    weights["fiber_g"] += 0.08 * max(glucose_risk, bmi_risk)
-    weights["protein_g"] += 0.05 * fuzzy_scores["complication_risk"]
-    weights["iron_mg"] += 0.05 * max(fuzzy_scores["age_risk"], fuzzy_scores["complication_risk"])
-    weights["calcium_mg"] += 0.04 * fuzzy_scores["age_risk"]
-    weights["calories"] += 0.10 * bmi_risk
+    # Make the dominant maternal risks meaningfully change the SAW priorities.
+    weights["sodium_mg"] += 0.50 * bp_risk
+    weights["sugar_g"] += 0.40 * glucose_risk
+    weights["fiber_g"] += 0.25 * max(glucose_risk, bmi_risk)
+    weights["protein_g"] += 0.18 * fuzzy_scores["complication_risk"]
+    weights["iron_mg"] += 0.20 * max(
+        fuzzy_scores["age_risk"], fuzzy_scores["complication_risk"]
+    )
+    weights["calcium_mg"] += 0.15 * fuzzy_scores["age_risk"]
+
+    if patient_data["BMI"] < 18.5:
+        weights["calories"] += 0.45 * bmi_risk
+        weights["protein_g"] += 0.20 * bmi_risk
+    elif patient_data["BMI"] >= 25:
+        weights["calories"] += 0.40 * bmi_risk
+        weights["protein_g"] += 0.10 * bmi_risk
 
     total = sum(weights.values())
     return {key: value / total for key, value in weights.items()}
@@ -241,14 +250,11 @@ def rank_foods_saw(food_data, patient_data, fuzzy_scores, top_n=5):
     normalized = pd.DataFrame(index=foods.index)
     for criterion in FOOD_CRITERIA:
         values = foods[criterion].astype(float)
+        percentile_rank = values.rank(method="average", pct=True)
         if criteria_types[criterion] == "benefit":
-            maximum = values.max()
-            normalized[criterion] = values / maximum if maximum > 0 else 0.0
+            normalized[criterion] = percentile_rank
         else:
-            value_range = values.max() - values.min()
-            normalized[criterion] = (
-                (values.max() - values) / value_range if value_range > 0 else 1.0
-            )
+            normalized[criterion] = 1.0 - percentile_rank
 
     foods["saw_score"] = sum(
         normalized[criterion] * weights[criterion] for criterion in FOOD_CRITERIA
