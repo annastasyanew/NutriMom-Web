@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NutriMom | Rekomendasi Nutrisi Ibu Hamil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('index') }}">
+            <span class="brand-mark">N</span>
+            <span>NutriMom</span>
+        </a>
+        <span class="header-note">Hybrid Decision Support System</span>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-copy">
+                <span class="eyebrow">Pendamping nutrisi kehamilan</span>
+                <h1>Kenali risiko.<br><em>Pilih nutrisi.</em></h1>
+                <p>NutriMom menggabungkan XGBoost, fuzzy logic, dan metode SAW untuk membantu memilih makanan berdasarkan profil maternal Anda.</p>
+                <div class="method-list">
+                    <span>Prediksi AI</span>
+                    <span>Skor risiko fuzzy</span>
+                    <span>Ranking makanan SAW</span>
+                </div>
+            </div>
+            <aside class="hero-panel">
+                <p class="panel-kicker">Cara kerja</p>
+                <ol>
+                    <li><strong>Isi profil</strong><span>Masukkan indikator kesehatan dasar.</span></li>
+                    <li><strong>Analisis hibrida</strong><span>Model dan sistem pendukung keputusan bekerja bersama.</span></li>
+                    <li><strong>Lihat rekomendasi</strong><span>Dapatkan lima pilihan makanan prioritas.</span></li>
+                </ol>
+            </aside>
+        </section>
+
+        <section class="form-section" id="profil">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Mulai analisis</span>
+                    <h2>Profil kesehatan ibu</h2>
+                </div>
+                <p>Semua data hanya digunakan untuk memproses rekomendasi saat ini dan tidak disimpan.</p>
+            </div>
+
+            {% if errors %}
+            <div class="alert" role="alert">
+                <strong>Mohon periksa kembali input Anda.</strong>
+                <ul>
+                    {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <form action="{{ url_for('predict') }}" method="post" class="patient-form">
+                <fieldset>
+                    <legend><span>01</span> Indikator utama</legend>
+                    <div class="field-grid">
+                        <label>Usia ibu <small>10-60 tahun</small>
+                            <input type="number" name="Age" min="10" max="60" step="1" required value="{{ values.get('Age', '') }}" placeholder="Contoh: 28">
+                        </label>
+                        <label>BMI <small>10-60 kg/m²</small>
+                            <input type="number" name="BMI" min="10" max="60" step="0.1" required value="{{ values.get('BMI', '') }}" placeholder="Contoh: 23.5">
+                        </label>
+                        <label>Gula darah (BS) <small>0-30 mmol/L</small>
+                            <input type="number" name="BS" min="0" max="30" step="0.1" required value="{{ values.get('BS', '') }}" placeholder="Contoh: 6.5">
+                        </label>
+                        <label>Suhu tubuh <small>90-110 °F</small>
+                            <input type="number" name="BodyTemp" min="90" max="110" step="0.1" required value="{{ values.get('BodyTemp', '') }}" placeholder="Contoh: 98.6">
+                        </label>
+                        <label>Denyut jantung <small>30-180 bpm</small>
+                            <input type="number" name="HeartRate" min="30" max="180" step="1" required value="{{ values.get('HeartRate', '') }}" placeholder="Contoh: 80">
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><span>02</span> Tekanan darah</legend>
+                    <div class="field-grid two-cols">
+                        <label>Sistolik <small>60-220 mmHg</small>
+                            <input type="number" name="SystolicBP" min="60" max="220" step="1" required value="{{ values.get('SystolicBP', '') }}" placeholder="Contoh: 120">
+                        </label>
+                        <label>Diastolik <small>40-140 mmHg</small>
+                            <input type="number" name="DiastolicBP" min="40" max="140" step="1" required value="{{ values.get('DiastolicBP', '') }}" placeholder="Contoh: 80">
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><span>03</span> Riwayat kesehatan</legend>
+                    <div class="field-grid two-cols">
+                        {% set choices = [
+                            ('PreviousComplications', 'Pernah mengalami komplikasi?'),
+                            ('PreexistingDiabetes', 'Diabetes sebelum kehamilan?'),
+                            ('GestationalDiabetes', 'Diabetes gestasional?'),
+                            ('MentalHealth', 'Gangguan kesehatan mental?')
+                        ] %}
+                        {% for name, label in choices %}
+                        <label>{{ label }}
+                            <select name="{{ name }}" required>
+                                <option value="" {% if not values.get(name) %}selected{% endif %}>Pilih jawaban</option>
+                                <option value="0" {% if values.get(name) == '0' %}selected{% endif %}>Tidak</option>
+                                <option value="1" {% if values.get(name) == '1' %}selected{% endif %}>Ya</option>
+                            </select>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+
+                <div class="submit-row">
+                    <p>Dengan melanjutkan, Anda memahami bahwa hasil ini bersifat edukatif.</p>
+                    <button type="submit">Analisis dan lihat rekomendasi <span>→</span></button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <strong>Catatan penting</strong>
+        <p>NutriMom bukan alat diagnosis dan tidak menggantikan konsultasi dokter, bidan, atau ahli gizi.</p>
+    </footer>
+</body>
+</html>
