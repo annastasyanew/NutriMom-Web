@@ -6,7 +6,11 @@ import joblib
 import numpy as np
 import pandas as pd
 import xgboost as xgb
+<<<<<<< HEAD
 from flask import Flask, redirect, render_template, request, url_for
+=======
+from flask import Flask, render_template, request, jsonify
+>>>>>>> caf9d22 (update fe safa)
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -350,6 +354,10 @@ def rank_foods_saw(food_data, patient_data, fuzzy_scores, top_n=5):
         "saw_score",
     ]
     records = top_foods[[col for col in columns if col in top_foods]].to_dict("records")
+    records = [
+        {**record, "food_score": record.get("saw_score", 0)}
+        for record in records
+    ]
     return records, weights, criteria_types
 
 
@@ -404,7 +412,10 @@ def parse_patient_form(form):
     errors = []
 
     for field, (label, minimum, maximum) in NUMERIC_FIELDS.items():
-        raw_value = form.get(field, "").strip()
+        raw_value = form.get(field, "")
+        if raw_value is None:
+            raw_value = ""
+        raw_value = str(raw_value).strip()
         if not raw_value:
             errors.append(f"{label} wajib diisi.")
             continue
@@ -418,7 +429,10 @@ def parse_patient_form(form):
         patient_data[field] = value
 
     for field, label in BOOLEAN_FIELDS.items():
-        raw_value = form.get(field, "").strip()
+        raw_value = form.get(field, "")
+        if raw_value is None:
+            raw_value = ""
+        raw_value = str(raw_value).strip()
         if raw_value not in {"0", "1"}:
             errors.append(f"{label} harus dipilih.")
         else:
@@ -429,9 +443,18 @@ def parse_patient_form(form):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+<<<<<<< HEAD
     if request.method == "POST":
         return predict()
     return render_template("index.html", errors=[], values={})
+=======
+    return render_template("index.html")
+
+
+@app.get("/predict")
+def predict_page():
+    return render_template("predict.html", errors=[], values={})
+>>>>>>> caf9d22 (update fe safa)
 
 
 @app.route("/predict", methods=["GET", "POST"])
@@ -442,7 +465,7 @@ def predict():
     patient_data, errors = parse_patient_form(request.form)
     if errors:
         return render_template(
-            "index.html", errors=errors, values=request.form.to_dict()
+            "predict.html", errors=errors, values=request.form.to_dict()
         ), 400
 
     try:
@@ -478,6 +501,55 @@ def predict():
         food_reason=food_reason,
         final_recommendation=final_recommendation,
         disclaimer=SYSTEM_CONFIG["disclaimer"],
+    )
+
+
+@app.post("/api/predict")
+def api_predict():
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"errors": ["Payload JSON tidak ditemukan."]}), 400
+
+    patient_data, errors = parse_patient_form(payload)
+    if errors:
+        return jsonify({"errors": errors}), 400
+
+    ai_result = predict_risk(patient_data)
+    fuzzy_scores = calculate_fuzzy_risk_scores(patient_data)
+    dominant_factors = get_dominant_risk_factors(fuzzy_scores)
+    top_foods, food_weights, criteria_types = rank_foods_saw(
+        FOOD_DATA, patient_data, fuzzy_scores
+    )
+    food_reason = build_food_reason(food_weights, criteria_types)
+    final_recommendation = build_final_recommendation(
+        ai_result["prediction"], dominant_factors, food_reason
+    )
+
+    response_foods = [
+        {
+            "food_name": item.get("food_name", ""),
+            "food_type": item.get("food_type", ""),
+            "calories": float(item.get("calories", 0) or 0),
+            "protein": float(item.get("protein_g", 0) or 0),
+            "fiber": float(item.get("fiber_g", 0) or 0),
+            "sugar": float(item.get("sugar_g", 0) or 0),
+            "iron": float(item.get("iron_mg", 0) or 0),
+            "calcium": float(item.get("calcium_mg", 0) or 0),
+            "food_score": float(item.get("saw_score", 0) or 0),
+        }
+        for item in top_foods
+    ]
+
+    return jsonify(
+        {
+            "ai_prediction": ai_result["prediction"],
+            "ai_confidence": round(ai_result["confidence"], 2),
+            "dominant_risks": [item["label"] for item in dominant_factors],
+            "top_foods": response_foods,
+            "final_recommendation": final_recommendation,
+            "probabilities": ai_result["probabilities"],
+            "disclaimer": SYSTEM_CONFIG["disclaimer"],
+        }
     )
 
 
