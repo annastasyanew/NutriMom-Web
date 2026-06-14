@@ -6,7 +6,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import xgboost as xgb
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -196,6 +196,15 @@ def adaptive_food_weights(patient_data, fuzzy_scores):
 
 def prepare_food_candidates(food_data):
     foods = food_data.copy()
+    unsafe_name_pattern = (
+        r"\braw\b|supplement|meal replacement|protein powder|whey protein|"
+        r"milkshake|infant formula|baby food"
+    )
+    foods = foods[
+        ~foods["food_name"].str.contains(
+            unsafe_name_pattern, case=False, regex=True, na=False
+        )
+    ]
     if "health_score" in foods:
         foods = foods[pd.to_numeric(foods["health_score"], errors="coerce") >= 50]
     if "food_type" in foods:
@@ -334,13 +343,18 @@ def parse_patient_form(form):
     return patient_data, errors
 
 
-@app.get("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
+    if request.method == "POST":
+        return predict()
     return render_template("index.html", errors=[], values={})
 
 
-@app.post("/predict")
+@app.route("/predict", methods=["GET", "POST"])
 def predict():
+    if request.method == "GET":
+        return redirect(url_for("index"))
+
     patient_data, errors = parse_patient_form(request.form)
     if errors:
         return render_template(
@@ -392,5 +406,10 @@ def not_found(_error):
     ), 404
 
 
+@app.errorhandler(405)
+def method_not_allowed(_error):
+    return redirect(url_for("index"))
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=False)
