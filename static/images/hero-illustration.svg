@@ -1,0 +1,25 @@
+<svg width="100%" height="100%" viewBox="0 0 720 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E6F6EA" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2F855A" />
+      <stop offset="100%" stop-color="#68D391" />
+    </linearGradient>
+  </defs>
+  <rect width="720" height="640" rx="48" fill="url(#bgGrad)" />
+  <circle cx="180" cy="160" r="112" fill="#F0F9F4" />
+  <path d="M178 120C158 120 142 136 142 156C142 176 158 192 178 192C198 192 214 176 214 156C214 136 198 120 178 120Z" fill="#2F855A" />
+  <path d="M164 172C146 172 132 186 132 204V276H224V204C224 186 210 172 192 172H164Z" fill="#38A169" opacity="0.35" />
+  <path d="M478 180C478 223 444 257 401 257C358 257 324 223 324 180C324 137 358 103 401 103C444 103 478 137 478 180Z" fill="#E8F7EE" />
+  <path d="M384 245C384 219 404 199 430 199C456 199 476 219 476 245V346H384V245Z" fill="#2F855A" opacity="0.2" />
+  <rect x="96" y="392" width="520" height="180" rx="24" fill="url(#accentGrad)" opacity="0.18" />
+  <rect x="130" y="420" width="400" height="120" rx="28" fill="#FFFFFF" />
+  <rect x="156" y="450" width="270" height="16" rx="8" fill="#CBD5E1" />
+  <rect x="156" y="484" width="220" height="16" rx="8" fill="#A0AEC0" />
+  <rect x="156" y="518" width="180" height="16" rx="8" fill="#68D391" />
+  <circle cx="534" cy="486" r="38" fill="#C6F6D5" />
+  <path d="M520 478L534 494L556 470" stroke="#2F855A" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+<<<<<<< HEAD
     <title>NutriMom | Rekomendasi Nutrisi Ibu Hamil</title>
     <script>
         const flaskHosts = ["127.0.0.1", "localhost"];
@@ -10,126 +11,146 @@
             window.location.replace("http://127.0.0.1:5000/");
         }
     </script>
+=======
+    <title>PregnaNutri | Maternal Nutrition Dashboard</title>
+>>>>>>> caf9d22 (update fe safa)
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <header class="site-header">
-        <a class="brand" href="{{ url_for('index') }}">
-            <span class="brand-mark">N</span>
-            <span>NutriMom</span>
-        </a>
-        <span class="header-note">Hybrid Decision Support System</span>
+    <header class="site-header fade-in">
+        <div class="container header-inner">
+            <a class="brand" href="{{ url_for('index') }}">
+                <span class="brand-mark">P</span>
+                <div>
+                    <strong>PregnaNutri</strong>
+                    <small>Maternal Nutrition AI</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('predict_page') }}">Prediction</a>
+                <a href="#features">Features</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
     </header>
 
     <main>
-        <section class="hero">
-            <div class="hero-copy">
-                <span class="eyebrow">Pendamping nutrisi kehamilan</span>
-                <h1>Kenali risiko.<br><em>Pilih nutrisi.</em></h1>
-                <p>NutriMom menggabungkan XGBoost, fuzzy logic, dan metode SAW untuk membantu memilih makanan berdasarkan profil maternal Anda.</p>
-                <div class="method-list">
-                    <span>Prediksi AI</span>
-                    <span>Skor risiko fuzzy</span>
-                    <span>Ranking makanan SAW</span>
+        <section class="hero-section fade-in">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <span class="eyebrow">Hybrid Decision Support System</span>
+                    <h1>PregnaNutri
+                        <span>Healthy nutrition recommendation for maternal care</span>
+                    </h1>
+                    <p>Platform rekomendasi makanan sehat ibu hamil berbasis Artificial Intelligence, Fuzzy Logic, dan Multi-Criteria Decision Making.</p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="{{ url_for('predict_page') }}">Get Recommendation</a>
+                        <a class="btn btn-soft" href="#features">Explore Features</a>
+                    </div>
+                    <div class="hero-stats">
+                        <article>
+                            <strong>95%</strong>
+                            <p>AI Maternal Risk Accuracy</p>
+                        </article>
+                        <article>
+                            <strong>3</strong>
+                            <p>Engine: XGBoost, Fuzzy, SAW</p>
+                        </article>
+                        <article>
+                            <strong>24/7</strong>
+                            <p>Ready for maternal monitoring</p>
+                        </article>
+                    </div>
+                </div>
+                <div class="hero-media">
+                    <div class="hero-card">
+                        <span>Safe guidance for healthy pregnancy</span>
+                        <h2>Smart nutrition planning</h2>
+                        <p>Analisis risiko maternal dan rekomendasi makanan seimbang untuk mendukung kesehatan ibu dan janin.</p>
+                    </div>
+                    <img src="{{ url_for('static', filename='images/hero-illustration.svg') }}" alt="Illustration maternal nutrition" class="hero-illustration">
                 </div>
             </div>
-            <aside class="hero-panel">
-                <p class="panel-kicker">Cara kerja</p>
-                <ol>
-                    <li><strong>Isi profil</strong><span>Masukkan indikator kesehatan dasar.</span></li>
-                    <li><strong>Analisis hibrida</strong><span>Model dan sistem pendukung keputusan bekerja bersama.</span></li>
-                    <li><strong>Lihat rekomendasi</strong><span>Dapatkan lima pilihan makanan prioritas.</span></li>
-                </ol>
-            </aside>
         </section>
 
-        <section class="form-section" id="profil">
-            <div class="section-heading">
+        <section id="features" class="features-section fade-in">
+            <div class="container section-header">
+                <span class="eyebrow">Core Features</span>
+                <h2>Empowering maternal health through intelligent food guidance</h2>
+                <p>PregnaNutri menggabungkan analisis data dan medis untuk memberikan insight nutrisi yang dapat ditindaklanjuti.</p>
+            </div>
+            <div class="container feature-grid">
+                <article class="feature-card hover-card">
+                    <div class="feature-icon">AI</div>
+                    <h3>AI Risk Prediction</h3>
+                    <p>Memprediksi risiko kesehatan ibu hamil menggunakan XGBoost.</p>
+                </article>
+                <article class="feature-card hover-card">
+                    <div class="feature-icon">FL</div>
+                    <h3>Fuzzy Risk Scoring</h3>
+                    <p>Menghitung tingkat risiko maternal secara bertingkat.</p>
+                </article>
+                <article class="feature-card hover-card">
+                    <div class="feature-icon">SAW</div>
+                    <h3>Smart Food Recommendation</h3>
+                    <p>Meranking makanan menggunakan metode SAW.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="workflow-section fade-in">
+            <div class="container workflow-grid">
+                <div class="workflow-intro">
+                    <span class="eyebrow">How it works</span>
+                    <h2>From assessment to recommendation in a few steps</h2>
+                    <p>Desain alur yang sederhana dan profesional membantu ibu hamil mendapatkan insight cepat.</p>
+                </div>
+                <div class="workflow-cards">
+                    <div class="step-card hover-card">
+                        <span>01</span>
+                        <h3>Submit health data</h3>
+                        <p>Isi usia, tekanan darah, gula darah, BMI, dan faktor medis.</p>
+                    </div>
+                    <div class="step-card hover-card">
+                        <span>02</span>
+                        <h3>Hybrid analysis</h3>
+                        <p>Model AI dan fuzzy logic memproses risiko maternal secara menyeluruh.</p>
+                    </div>
+                    <div class="step-card hover-card">
+                        <span>03</span>
+                        <h3>Receive food plan</h3>
+                        <p>Lihat rekomendasi makanan prioritas lengkap dengan skor nutrisi.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section fade-in" id="contact">
+            <div class="container cta-panel">
                 <div>
-                    <span class="eyebrow">Mulai analisis</span>
-                    <h2>Profil kesehatan ibu</h2>
+                    <span class="eyebrow">Ready for insight?</span>
+                    <h2>Mulai rekomendasi nutrisi yang lebih cerdas hari ini.</h2>
                 </div>
-                <p>Semua data hanya digunakan untuk memproses rekomendasi saat ini dan tidak disimpan.</p>
+                <a class="btn btn-primary" href="{{ url_for('predict_page') }}">Start Assessment</a>
             </div>
-
-            {% if errors %}
-            <div class="alert" role="alert">
-                <strong>Mohon periksa kembali input Anda.</strong>
-                <ul>
-                    {% for error in errors %}<li>{{ error }}</li>{% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-
-            <form action="{{ url_for('predict') }}" method="post" class="patient-form">
-                <fieldset>
-                    <legend><span>01</span> Indikator utama</legend>
-                    <div class="field-grid">
-                        <label>Usia ibu <small>10-60 tahun</small>
-                            <input type="number" name="Age" min="10" max="60" step="1" required value="{{ values.get('Age', '') }}" placeholder="Contoh: 28">
-                        </label>
-                        <label>BMI <small>10-60 kg/m²</small>
-                            <input type="number" name="BMI" min="10" max="60" step="0.1" required value="{{ values.get('BMI', '') }}" placeholder="Contoh: 23.5">
-                        </label>
-                        <label>Gula darah (BS) <small>0-30 mmol/L</small>
-                            <input type="number" name="BS" min="0" max="30" step="0.1" required value="{{ values.get('BS', '') }}" placeholder="Contoh: 6.5">
-                        </label>
-                        <label>Suhu tubuh <small>90-110 °F</small>
-                            <input type="number" name="BodyTemp" min="90" max="110" step="0.1" required value="{{ values.get('BodyTemp', '') }}" placeholder="Contoh: 98.6">
-                        </label>
-                        <label>Denyut jantung <small>30-180 bpm</small>
-                            <input type="number" name="HeartRate" min="30" max="180" step="1" required value="{{ values.get('HeartRate', '') }}" placeholder="Contoh: 80">
-                        </label>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend><span>02</span> Tekanan darah</legend>
-                    <div class="field-grid two-cols">
-                        <label>Sistolik <small>60-220 mmHg</small>
-                            <input type="number" name="SystolicBP" min="60" max="220" step="1" required value="{{ values.get('SystolicBP', '') }}" placeholder="Contoh: 120">
-                        </label>
-                        <label>Diastolik <small>40-140 mmHg</small>
-                            <input type="number" name="DiastolicBP" min="40" max="140" step="1" required value="{{ values.get('DiastolicBP', '') }}" placeholder="Contoh: 80">
-                        </label>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend><span>03</span> Riwayat kesehatan</legend>
-                    <div class="field-grid two-cols">
-                        {% set choices = [
-                            ('PreviousComplications', 'Pernah mengalami komplikasi?'),
-                            ('PreexistingDiabetes', 'Diabetes sebelum kehamilan?'),
-                            ('GestationalDiabetes', 'Diabetes gestasional?'),
-                            ('MentalHealth', 'Gangguan kesehatan mental?')
-                        ] %}
-                        {% for name, label in choices %}
-                        <label>{{ label }}
-                            <select name="{{ name }}" required>
-                                <option value="" {% if not values.get(name) %}selected{% endif %}>Pilih jawaban</option>
-                                <option value="0" {% if values.get(name) == '0' %}selected{% endif %}>Tidak</option>
-                                <option value="1" {% if values.get(name) == '1' %}selected{% endif %}>Ya</option>
-                            </select>
-                        </label>
-                        {% endfor %}
-                    </div>
-                </fieldset>
-
-                <div class="submit-row">
-                    <p>Dengan melanjutkan, Anda memahami bahwa hasil ini bersifat edukatif.</p>
-                    <button type="submit">Analisis dan lihat rekomendasi <span>→</span></button>
-                </div>
-            </form>
         </section>
     </main>
 
-    <footer>
-        <strong>Catatan penting</strong>
-        <p>NutriMom bukan alat diagnosis dan tidak menggantikan konsultasi dokter, bidan, atau ahli gizi.</p>
+    <footer class="site-footer fade-in">
+        <div class="container footer-inner">
+            <div>
+                <strong>PregnaNutri</strong>
+                <p>Solusi nutrisi maternal yang modern, responsif, dan siap integrasi dengan backend Flask.</p>
+            </div>
+            <p class="footer-note">Disclaimer: Hasil hanya bersifat edukatif dan bukan pengganti konsultasi profesional.</p>
+        </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
