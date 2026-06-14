@@ -6,11 +6,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import xgboost as xgb
-<<<<<<< HEAD
-from flask import Flask, redirect, render_template, request, url_for
-=======
-from flask import Flask, render_template, request, jsonify
->>>>>>> caf9d22 (update fe safa)
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -210,8 +206,17 @@ def adaptive_food_weights(patient_data, fuzzy_scores):
 def prepare_food_candidates(food_data):
     foods = food_data.copy()
     unsafe_name_pattern = (
-        r"\braw\b|supplement|meal replacement|protein powder|whey protein|"
-        r"milkshake|infant formula|baby food"
+        r"\braw\b|alcohol|beer|wine|liquor|cocktail|soda|soft drink|"
+        r"energy drink|candy|chocolate|ice cream|frozen yogurt|cake|cookie|"
+        r"brownie|donut|sweetened|syrup|pudding|dessert|\bbar\b|\bbars\b|"
+        r"burger|burrito|jerky|crumbles|sandwich|wrap|pizza|hot dog|"
+        r"sausage|deli meat|ready-to-eat|snack mix|breaded|fried|pretzel|"
+        r"\bchips\b|cheese sticks|supplement|"
+        r"meal replacement|protein powder|whey protein|milkshake|"
+        r"infant formula|baby food|freeze-dried|dehydrated|powder|"
+        r"\bcrude\b|\bspice\b|\bseasoning\b|\bextract\b|\bspleen\b|"
+        r"\bliver\b|\bbrain\b|beef kidney|pork kidney|lamb kidney|veal kidney|"
+        r"variety meats|by-products"
     )
     foods = foods[
         ~foods["food_name"].str.contains(
@@ -301,10 +306,10 @@ def apply_condition_based_food_filter(food_data, patient_data, fuzzy_scores):
 def rank_foods_saw(food_data, patient_data, fuzzy_scores, top_n=5):
     foods = prepare_food_candidates(food_data)
     foods = apply_condition_based_food_filter(
-            foods,
-            patient_data,
-            fuzzy_scores
-        )
+        foods,
+        patient_data,
+        fuzzy_scores,
+    )
     weights = adaptive_food_weights(patient_data, fuzzy_scores)
     criteria_types = {
         "protein_g": "benefit",
@@ -359,6 +364,18 @@ def rank_foods_saw(food_data, patient_data, fuzzy_scores, top_n=5):
         for record in records
     ]
     return records, weights, criteria_types
+
+
+def print_recommendation_debug(
+    patient_data, fuzzy_scores, food_weights, criteria_types, top_foods
+):
+    print("PATIENT DATA:", patient_data, flush=True)
+    print("FUZZY SCORES:", fuzzy_scores, flush=True)
+    print("FOOD WEIGHTS:", food_weights, flush=True)
+    print("CRITERIA TYPES:", criteria_types, flush=True)
+    print("FULL TOP FOODS:", flush=True)
+    for food in top_foods:
+        print(food, flush=True)
 
 
 def build_food_reason(weights, criteria_types):
@@ -441,27 +458,18 @@ def parse_patient_form(form):
     return patient_data, errors
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.get("/")
 def index():
-<<<<<<< HEAD
-    if request.method == "POST":
-        return predict()
-    return render_template("index.html", errors=[], values={})
-=======
     return render_template("index.html")
 
 
 @app.get("/predict")
 def predict_page():
     return render_template("predict.html", errors=[], values={})
->>>>>>> caf9d22 (update fe safa)
 
 
-@app.route("/predict", methods=["GET", "POST"])
+@app.post("/predict")
 def predict():
-    if request.method == "GET":
-        return redirect(url_for("index"))
-
     patient_data, errors = parse_patient_form(request.form)
     if errors:
         return render_template(
@@ -475,6 +483,13 @@ def predict():
         top_foods, food_weights, criteria_types = rank_foods_saw(
             FOOD_DATA, patient_data, fuzzy_scores
         )
+        print_recommendation_debug(
+            patient_data,
+            fuzzy_scores,
+            food_weights,
+            criteria_types,
+            top_foods,
+        )
         food_reason = build_food_reason(food_weights, criteria_types)
         final_recommendation = build_final_recommendation(
             ai_result["prediction"], dominant_factors, food_reason
@@ -482,7 +497,7 @@ def predict():
     except Exception:
         app.logger.exception("Gagal memproses rekomendasi")
         return render_template(
-            "index.html",
+            "predict.html",
             errors=["Sistem gagal memproses data. Periksa file model dan coba lagi."],
             values=request.form.to_dict(),
         ), 500

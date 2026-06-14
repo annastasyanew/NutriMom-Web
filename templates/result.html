@@ -108,16 +108,17 @@
                             <span class="food-rank">{{ '%02d'|format(loop.index) }}</span>
                             <h3>{{ food.food_name|title }}</h3>
                         </div>
-                        <span class="badge-pill">Score {{ '%.2f'|format(food.food_score) }}</span>
+                        <span class="badge-pill">Score {{ '%.2f'|format(food.saw_score) }}</span>
                     </div>
                     <p class="food-meta">{{ food.food_type or 'Nutrition item' }}</p>
                     <div class="nutrition-grid">
                         <div><strong>{{ food.calories|default(0)|round(0) }}</strong><small>Calories</small></div>
-                        <div><strong>{{ food.protein|default(0)|round(1) }}g</strong><small>Protein</small></div>
-                        <div><strong>{{ food.fiber|default(0)|round(1) }}g</strong><small>Fiber</small></div>
-                        <div><strong>{{ food.sugar|default(0)|round(1) }}g</strong><small>Sugar</small></div>
-                        <div><strong>{{ food.iron|default(0)|round(1) }}mg</strong><small>Iron</small></div>
-                        <div><strong>{{ food.calcium|default(0)|round(0) }}mg</strong><small>Calcium</small></div>
+                        <div><strong>{{ food.protein_g|default(0)|round(1) }}g</strong><small>Protein</small></div>
+                        <div><strong>{{ food.fiber_g|default(0)|round(1) }}g</strong><small>Fiber</small></div>
+                        <div><strong>{{ food.sugar_g|default(0)|round(1) }}g</strong><small>Sugar</small></div>
+                        <div><strong>{{ food.sodium_mg|default(0)|round(0) }}mg</strong><small>Sodium</small></div>
+                        <div><strong>{{ food.iron_mg|default(0)|round(1) }}mg</strong><small>Iron</small></div>
+                        <div><strong>{{ food.calcium_mg|default(0)|round(0) }}mg</strong><small>Calcium</small></div>
                     </div>
                     <a href="#" class="btn btn-soft btn-block">View Detail</a>
                 </article>
