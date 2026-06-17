@@ -79,6 +79,22 @@ def load_resources():
             f"Kolom knowledge base tidak lengkap: {', '.join(missing_food_cols)}"
         )
 
+    if "food_display_name" not in foods.columns:
+        foods["food_display_name"] = foods["food_name"]
+    if "preparation_method" not in foods.columns:
+        foods["preparation_method"] = "unspecified"
+
+    foods["food_display_name"] = foods["food_display_name"].fillna(foods["food_name"])
+    foods["preparation_method"] = foods["preparation_method"].fillna("unspecified")
+    foods["food_label"] = np.where(
+        foods["preparation_method"].astype(str).str.lower().eq("unspecified"),
+        foods["food_display_name"],
+        foods["food_display_name"].astype(str)
+        + " ("
+        + foods["preparation_method"].astype(str)
+        + ")",
+    )
+
     foods[food_criteria] = foods[food_criteria].apply(pd.to_numeric, errors="coerce")
     foods = foods.dropna(subset=["food_name", *food_criteria]).copy()
     return config, model, imputer, foods
@@ -353,9 +369,14 @@ def rank_foods_saw(food_data, patient_data, fuzzy_scores, top_n=5):
     top_foods = foods.loc[selected_indices[:top_n]].copy()
     columns = [
         "food_name",
+        "food_display_name",
+        "preparation_method",
+        "food_label",
         "food_category",
         "food_type",
+        "food_group_clean",
         *FOOD_CRITERIA,
+        "health_score",
         "saw_score",
     ]
     records = top_foods[[col for col in columns if col in top_foods]].to_dict("records")
@@ -543,13 +564,23 @@ def api_predict():
     response_foods = [
         {
             "food_name": item.get("food_name", ""),
+            "food_display_name": item.get("food_display_name", item.get("food_name", "")),
+            "preparation_method": item.get("preparation_method", "unspecified"),
+            "food_label": item.get("food_label", item.get("food_name", "")),
             "food_type": item.get("food_type", ""),
+            "food_group_clean": item.get("food_group_clean", ""),
             "calories": float(item.get("calories", 0) or 0),
             "protein": float(item.get("protein_g", 0) or 0),
+            "protein_g": float(item.get("protein_g", 0) or 0),
             "fiber": float(item.get("fiber_g", 0) or 0),
+            "fiber_g": float(item.get("fiber_g", 0) or 0),
             "sugar": float(item.get("sugar_g", 0) or 0),
+            "sugar_g": float(item.get("sugar_g", 0) or 0),
+            "sodium_mg": float(item.get("sodium_mg", 0) or 0),
             "iron": float(item.get("iron_mg", 0) or 0),
+            "iron_mg": float(item.get("iron_mg", 0) or 0),
             "calcium": float(item.get("calcium_mg", 0) or 0),
+            "calcium_mg": float(item.get("calcium_mg", 0) or 0),
             "food_score": float(item.get("saw_score", 0) or 0),
         }
         for item in top_foods

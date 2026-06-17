@@ -106,7 +106,10 @@
                     <div class="food-card-header">
                         <div>
                             <span class="food-rank">{{ '%02d'|format(loop.index) }}</span>
-                            <h3>{{ food.food_name|title }}</h3>
+                            <h3>{{ (food.food_display_name or food.food_name)|title }}</h3>
+                            {% if food.preparation_method and food.preparation_method|lower != 'unspecified' %}
+                            <p class="food-method">Metode/Bentuk: {{ food.preparation_method }}</p>
+                            {% endif %}
                         </div>
                         <span class="badge-pill">Score {{ '%.2f'|format(food.saw_score) }}</span>
                     </div>
