@@ -61,8 +61,11 @@
                     {% for key, label in risk_items %}
                     <div class="risk-item hover-card">
                         <div class="risk-meta">
-                            <span>{{ label }}</span>
-                            <strong>{{ '%.2f'|format(fuzzy_scores[key]) }}</strong>
+                            <div>
+                                <small>{{ label }}</small>
+                                <strong>{{ '%.0f'|format(fuzzy_scores[key] * 100) }}%</strong>
+                            </div>
+                            <span class="risk-badge">{{ '%.2f'|format(fuzzy_scores[key]) }}</span>
                         </div>
                         <div class="progress-bar soft">
                             <span style="width: {{ fuzzy_scores[key] * 100 }}%;"></span>
@@ -75,17 +78,23 @@
             <article class="card factor-card">
                 <div class="card-heading"><span>02</span><h2>Dominant Risks</h2></div>
                 {% if dominant_factors %}
-                <ul class="dominant-list">
+                <div class="dominant-chips">
                     {% for factor in dominant_factors %}
-                    <li>
-                        <div>
-                            <strong>{{ factor.label }}</strong>
-                            <span>{{ '%.0f'|format(factor.score * 100) }}%</span>
-                        </div>
-                        <div class="progress-bar slim"><span style="width: {{ factor.score * 100 }}%;"></span></div>
-                    </li>
+                    <div class="risk-chip">
+                        <span>{{ factor.label }}</span>
+                        <strong>{{ '%.0f'|format(factor.score * 100) }}%</strong>
+                    </div>
                     {% endfor %}
-                </ul>
+                </div>
+                <div class="dominant-chart">
+                    {% for factor in dominant_factors %}
+                    <div class="dominant-bar">
+                        <span>{{ factor.label }}</span>
+                        <strong>{{ '%.0f'|format(factor.score * 100) }}%</strong>
+                        <div class="progress-bar slim"><span style="width: {{ factor.score * 100 }}%;"></span></div>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% else %}
                 <p class="empty-state">Tidak ada faktor risiko dominan yang melebihi ambang 0.5.</p>
                 {% endif %}
@@ -103,27 +112,37 @@
             <div class="foods-grid">
                 {% for food in top_foods %}
                 <article class="food-card hover-card">
-                    <div class="food-card-header">
-                        <div>
-                            <span class="food-rank">{{ '%02d'|format(loop.index) }}</span>
-                            <h3>{{ (food.food_display_name or food.food_name)|title }}</h3>
-                            {% if food.preparation_method and food.preparation_method|lower != 'unspecified' %}
-                            <p class="food-method">Metode/Bentuk: {{ food.preparation_method }}</p>
-                            {% endif %}
+                    <div class="food-card-top">
+                        <div class="food-card-title-group">
+                            <span class="food-rank">#{{ '%02d'|format(loop.index) }}</span>
+                            <div>
+                                <h3>{{ food.food_display_name|title }}</h3>
+                                <div class="food-badges">
+                                    <span class="food-category-badge">{{ food.food_type or 'Nutrition item' }}</span>
+                                </div>
+                            </div>
                         </div>
                         <span class="badge-pill">Score {{ '%.2f'|format(food.saw_score) }}</span>
                     </div>
-                    <p class="food-meta">{{ food.food_type or 'Nutrition item' }}</p>
-                    <div class="nutrition-grid">
-                        <div><strong>{{ food.calories|default(0)|round(0) }}</strong><small>Calories</small></div>
-                        <div><strong>{{ food.protein_g|default(0)|round(1) }}g</strong><small>Protein</small></div>
-                        <div><strong>{{ food.fiber_g|default(0)|round(1) }}g</strong><small>Fiber</small></div>
-                        <div><strong>{{ food.sugar_g|default(0)|round(1) }}g</strong><small>Sugar</small></div>
-                        <div><strong>{{ food.sodium_mg|default(0)|round(0) }}mg</strong><small>Sodium</small></div>
-                        <div><strong>{{ food.iron_mg|default(0)|round(1) }}mg</strong><small>Iron</small></div>
-                        <div><strong>{{ food.calcium_mg|default(0)|round(0) }}mg</strong><small>Calcium</small></div>
+                    {% if food.food_label %}
+                    <p class="food-description">{{ food.food_label }}</p>
+                    {% else %}
+                    <p class="food-description">Nutrisi berkualitas untuk mendukung kesehatan ibu dan janin.</p>
+                    {% endif %}
+                    <div class="food-card-footer">
+                        <button type="button" class="btn btn-soft btn-block food-toggle-btn" aria-expanded="false">View details</button>
                     </div>
-                    <a href="#" class="btn btn-soft btn-block">View Detail</a>
+                    <div class="food-details" aria-hidden="true">
+                        <div class="food-card-stats">
+                            <div class="food-card-stat"><strong>{{ food.calories|default(0)|round(0) }}</strong><small>Calories</small></div>
+                            <div class="food-card-stat"><strong>{{ food.protein_g|default(0)|round(1) }}g</strong><small>Protein</small></div>
+                            <div class="food-card-stat"><strong>{{ food.fiber_g|default(0)|round(1) }}g</strong><small>Fiber</small></div>
+                            <div class="food-card-stat"><strong>{{ food.sugar_g|default(0)|round(1) }}g</strong><small>Sugar</small></div>
+                            <div class="food-card-stat"><strong>{{ food.sodium_mg|default(0)|round(0) }}mg</strong><small>Sodium</small></div>
+                            <div class="food-card-stat"><strong>{{ food.iron_mg|default(0)|round(1) }}mg</strong><small>Iron</small></div>
+                            <div class="food-card-stat"><strong>{{ food.calcium_mg|default(0)|round(0) }}mg</strong><small>Calcium</small></div>
+                        </div>
+                    </div>
                 </article>
                 {% endfor %}
             </div>
@@ -136,6 +155,7 @@
             </div>
             <div class="explanation-grid">
                 <article class="card explanation-card hover-card">
+                    <div class="explanation-icon">⚠️</div>
                     <h3>Dominant risk factors</h3>
                     <p>{% if dominant_factors %}
                         {% for factor in dominant_factors %}
@@ -146,10 +166,12 @@
                     {% endif %}</p>
                 </article>
                 <article class="card explanation-card hover-card">
+                    <div class="explanation-icon">🥗</div>
                     <h3>Why these foods?</h3>
-                    <p>Rekomendasi dipilih berdasarkan kombinasi kebutuhan protein, serat, zat besi, kalsium, dan kontrol gula untuk kondisi maternal.</p>
+                    <p>Rekomendasi dipilih berdasarkan kebutuhan nutrisi ibu hamil: protein, serat, zat besi, kalsium, dan kontrol gula.</p>
                 </article>
-                <article class="card explanation-card hover-card">
+                <article class="card explanation-card hover-card recommendation-card">
+                    <div class="explanation-icon">🌸</div>
                     <h3>Final recommendation</h3>
                     <p>{{ final_recommendation }}</p>
                 </article>

@@ -4,11 +4,6 @@ const apiConfig = {
   timeout: 12000,
 };
 
-const apiConfig = {
-  endpoint: "/api/predict",
-  timeout: 12000,
-};
-
 const buildRequestBody = (form) => ({
   Age: Number(form.Age.value),
   SystolicBP: Number(form.SystolicBP.value),
@@ -61,8 +56,30 @@ const initPageAnimations = () => {
   });
 };
 
+const initFoodToggle = () => {
+  const buttons = document.querySelectorAll('.food-toggle-btn');
+  buttons.forEach((button) => {
+    const card = button.closest('.food-card');
+    if (!card) return;
+    const details = card.querySelector('.food-details');
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      const expanded = details.classList.toggle('open');
+      button.setAttribute('aria-expanded', expanded);
+      details.setAttribute('aria-hidden', String(!expanded));
+      button.textContent = expanded ? 'Hide details' : 'View details';
+      if (expanded) {
+        details.style.maxHeight = `${details.scrollHeight}px`;
+      } else {
+        details.style.maxHeight = null;
+      }
+    });
+  });
+};
+
 window.addEventListener("DOMContentLoaded", () => {
   initPageAnimations();
+  initFoodToggle();
 });
 
 window.PregnaNutriApi = {
