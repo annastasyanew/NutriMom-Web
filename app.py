@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from pathlib import Path
 
 import joblib
@@ -53,7 +54,7 @@ CRITERIA_LABELS = {
 }
 
 app = Flask(__name__, template_folder=".")
-app.config["SECRET_KEY"] = "nutrimom-prototype"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "nutrimom-prototype")
 logging.basicConfig(level=logging.INFO)
 
 
@@ -229,7 +230,7 @@ def prepare_food_candidates(food_data):
         r"sausage|deli meat|ready-to-eat|snack mix|breaded|fried|pretzel|"
         r"\bchips\b|cheese sticks|supplement|"
         r"meal replacement|protein powder|whey protein|milkshake|"
-        r"infant formula|baby food|freeze-dried|dehydrated|powder|"
+        r"infant formula|baby\s*food|freeze-dried|dehydrated|powder|"
         r"\bcrude\b|\bspice\b|\bseasoning\b|\bextract\b|\bspleen\b|"
         r"\bliver\b|\bbrain\b|beef kidney|pork kidney|lamb kidney|veal kidney|"
         r"variety meats|by-products"
@@ -304,7 +305,7 @@ def apply_condition_based_food_filter(food_data, patient_data, fuzzy_scores):
         "candy", "soda", "soft drink",
         "raw egg", "raw meat", "raw fish",
         "supplement", "protein powder", "whey protein",
-        "meal replacement", "infant formula", "baby food"
+        "meal replacement", "infant formula", "babyfood", "baby food"
     ]
 
     pattern = "|".join(exclude_keywords)
@@ -390,6 +391,9 @@ def rank_foods_saw(food_data, patient_data, fuzzy_scores, top_n=5):
 def print_recommendation_debug(
     patient_data, fuzzy_scores, food_weights, criteria_types, top_foods
 ):
+    if os.environ.get("DEBUG_RECOMMENDATIONS") != "1":
+        return
+
     print("PATIENT DATA:", patient_data, flush=True)
     print("FUZZY SCORES:", fuzzy_scores, flush=True)
     print("FOOD WEIGHTS:", food_weights, flush=True)
@@ -444,6 +448,46 @@ def build_final_recommendation(prediction, dominant_factors, food_reason):
         f"kriteria {food_reason}. Sistem ini hanya alat bantu edukatif dan tidak "
         f"menggantikan konsultasi dokter atau ahli gizi."
     )
+
+
+def serialize_foods(top_foods):
+    return [
+        {
+            "food_display_name": item.get(
+                "food_display_name", item.get("food_name", "Nutrition item")
+            ),
+            "food_label": item.get("food_label", item.get("food_name", "")),
+            "food_type": item.get("food_type", "Nutrition item"),
+            "calories": float(item.get("calories", 0) or 0),
+            "protein_g": float(item.get("protein_g", 0) or 0),
+            "fiber_g": float(item.get("fiber_g", 0) or 0),
+            "sugar_g": float(item.get("sugar_g", 0) or 0),
+            "sodium_mg": float(item.get("sodium_mg", 0) or 0),
+            "iron_mg": float(item.get("iron_mg", 0) or 0),
+            "calcium_mg": float(item.get("calcium_mg", 0) or 0),
+            "saw_score": float(item.get("saw_score", item.get("food_score", 0)) or 0),
+        }
+        for item in top_foods
+    ]
+
+
+def build_result_payload(ai_result, fuzzy_scores, dominant_factors, top_foods, final_recommendation):
+    return {
+        "ai_result": {
+            "prediction": ai_result["prediction"],
+            "confidence": float(ai_result["confidence"]),
+        },
+        "fuzzy_scores": {key: float(value) for key, value in fuzzy_scores.items()},
+        "dominant_factors": [
+            {
+                "label": item["label"],
+                "score": float(item["score"]),
+            }
+            for item in dominant_factors
+        ],
+        "top_foods": serialize_foods(top_foods),
+        "final_recommendation": final_recommendation,
+    }
     
 def parse_patient_form(form):
     patient_data = {}
@@ -504,6 +548,17 @@ def result_file_page():
     return redirect(url_for("predict_file_page"))
 
 
+@app.get("/healthz")
+def health_check():
+    return jsonify(
+        {
+            "status": "ok",
+            "model_loaded": MODEL is not None,
+            "food_rows": int(len(FOOD_DATA)),
+        }
+    )
+
+
 @app.get("/templates/index.html")
 def legacy_index_file_page():
     return redirect(url_for("index"))
@@ -555,6 +610,13 @@ def predict():
 
     return render_template(
         "result.html",
+        result_payload=build_result_payload(
+            ai_result,
+            fuzzy_scores,
+            dominant_factors,
+            top_foods,
+            final_recommendation,
+        ),
         patient_data=patient_data,
         ai_result=ai_result,
         fuzzy_scores=fuzzy_scores,
@@ -580,16 +642,22 @@ def api_predict():
     if errors:
         return jsonify({"errors": errors}), 400
 
-    ai_result = predict_risk(patient_data)
-    fuzzy_scores = calculate_fuzzy_risk_scores(patient_data)
-    dominant_factors = get_dominant_risk_factors(fuzzy_scores)
-    top_foods, food_weights, criteria_types = rank_foods_saw(
-        FOOD_DATA, patient_data, fuzzy_scores
-    )
-    food_reason = build_food_reason(food_weights, criteria_types)
-    final_recommendation = build_final_recommendation(
-        ai_result["prediction"], dominant_factors, food_reason
-    )
+    try:
+        ai_result = predict_risk(patient_data)
+        fuzzy_scores = calculate_fuzzy_risk_scores(patient_data)
+        dominant_factors = get_dominant_risk_factors(fuzzy_scores)
+        top_foods, food_weights, criteria_types = rank_foods_saw(
+            FOOD_DATA, patient_data, fuzzy_scores
+        )
+        food_reason = build_food_reason(food_weights, criteria_types)
+        final_recommendation = build_final_recommendation(
+            ai_result["prediction"], dominant_factors, food_reason
+        )
+    except Exception:
+        app.logger.exception("Gagal memproses rekomendasi API")
+        return jsonify(
+            {"errors": ["Sistem gagal memproses data. Periksa file model dan coba lagi."]}
+        ), 500
 
     response_foods = [
         {
@@ -644,4 +712,5 @@ def method_not_allowed(_error):
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)

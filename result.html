@@ -34,15 +34,15 @@
                 <h1>Risk profile analysis</h1>
                 <p>Ringkasan hasil dengan tingkat keyakinan model dan faktor risiko yang paling berpengaruh.</p>
             </div>
-            <div class="summary-card {{ 'badge-high' if ai_result.prediction == 'High Risk' else 'badge-mid' if ai_result.prediction == 'Mid Risk' else 'badge-low' }}">
+            <div class="summary-card badge-mid" id="summaryCard">
                 <div class="summary-top">
                     <small>Risk Level</small>
-                    <strong>{{ ai_result.prediction }}</strong>
+                    <strong data-result="prediction">Waiting for data</strong>
                 </div>
                 <div class="confidence-block">
                     <span>AI Confidence</span>
-                    <div class="confidence-bar"><span style="width: {{ ai_result.confidence * 100 }}%;"></span></div>
-                    <strong>{{ '%.0f'|format(ai_result.confidence * 100) }}%</strong>
+                    <div class="confidence-bar"><span data-result-style="confidenceWidth" style="width: 0%;"></span></div>
+                    <strong data-result="confidence">0%</strong>
                 </div>
             </div>
         </section>
@@ -50,52 +50,13 @@
         <section class="result-grid fade-in">
             <article class="card risk-card">
                 <div class="card-heading"><span>01</span><h2>Risk Factors</h2></div>
-                <div class="risk-grid">
-                    {% set risk_items = [
-                        ('bp_risk', 'Blood Pressure Risk'),
-                        ('glucose_risk', 'Glucose Risk'),
-                        ('bmi_risk', 'BMI Risk'),
-                        ('temperature_risk', 'Temperature Risk'),
-                        ('heart_rate_risk', 'Heart Rate Risk')
-                    ] %}
-                    {% for key, label in risk_items %}
-                    <div class="risk-item hover-card">
-                        <div class="risk-meta">
-                            <div>
-                                <small>{{ label }}</small>
-                                <strong>{{ '%.0f'|format(fuzzy_scores[key] * 100) }}%</strong>
-                            </div>
-                            <span class="risk-badge">{{ '%.2f'|format(fuzzy_scores[key]) }}</span>
-                        </div>
-                        <div class="progress-bar soft">
-                            <span style="width: {{ fuzzy_scores[key] * 100 }}%;"></span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+                <div class="risk-grid" id="riskGrid"></div>
             </article>
 
             <article class="card factor-card">
                 <div class="card-heading"><span>02</span><h2>Dominant Risks</h2></div>
-                {% if dominant_factors %}
-                <div class="dominant-chart">
-                    {% for factor in dominant_factors %}
-                    <div class="dominant-bar">
-                        <div class="dominant-topline">
-                            <span class="dominant-icon"><i class="bi {{ loop.cycle('bi-person-heart', 'bi-droplet-half', 'bi-speedometer2', 'bi-heart-pulse') }}"></i></span>
-                            <div class="dominant-copy">
-                                <span>{{ factor.label }}</span>
-                                <small>{{ 'Critical attention' if factor.score >= 0.85 else 'Needs attention' }}</small>
-                            </div>
-                            <strong>{{ '%.0f'|format(factor.score * 100) }}%</strong>
-                        </div>
-                        <div class="progress-bar slim"><span style="width: {{ factor.score * 100 }}%;"></span></div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p class="empty-state">Tidak ada faktor risiko dominan yang melebihi ambang 0.5.</p>
-                {% endif %}
+                <div class="dominant-chart" id="dominantChart"></div>
+                <p class="empty-state" id="dominantEmpty" hidden>Tidak ada faktor risiko dominan yang melebihi ambang 0.5.</p>
             </article>
         </section>
 
@@ -107,43 +68,7 @@
                 </div>
                 <p>Rekomendasi makanan ditentukan berdasarkan skor nutrisi dan kebutuhan risiko maternal Anda.</p>
             </div>
-            <div class="foods-grid">
-                {% for food in top_foods %}
-                <article class="food-card hover-card">
-                    <div class="food-card-top">
-                        <div class="food-card-title-group">
-                            <span class="food-rank">#{{ '%02d'|format(loop.index) }}</span>
-                            <div>
-                                <h3>{{ food.food_display_name|title }}</h3>
-                                <div class="food-badges">
-                                    <span class="food-category-badge">{{ food.food_type or 'Nutrition item' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <span class="badge-pill">Score {{ '%.2f'|format(food.saw_score) }}</span>
-                    </div>
-                    {% if food.food_label %}
-                    <p class="food-description">{{ food.food_label }}</p>
-                    {% else %}
-                    <p class="food-description">Nutrisi berkualitas untuk mendukung kesehatan ibu dan janin.</p>
-                    {% endif %}
-                    <div class="food-card-footer">
-                        <button type="button" class="btn btn-soft btn-block food-toggle-btn" aria-expanded="false">View details</button>
-                    </div>
-                    <div class="food-details" aria-hidden="true">
-                        <div class="food-card-stats">
-                            <div class="food-card-stat"><strong>{{ food.calories|default(0)|round(0) }}</strong><small>Calories</small></div>
-                            <div class="food-card-stat"><strong>{{ food.protein_g|default(0)|round(1) }}g</strong><small>Protein</small></div>
-                            <div class="food-card-stat"><strong>{{ food.fiber_g|default(0)|round(1) }}g</strong><small>Fiber</small></div>
-                            <div class="food-card-stat"><strong>{{ food.sugar_g|default(0)|round(1) }}g</strong><small>Sugar</small></div>
-                            <div class="food-card-stat"><strong>{{ food.sodium_mg|default(0)|round(0) }}mg</strong><small>Sodium</small></div>
-                            <div class="food-card-stat"><strong>{{ food.iron_mg|default(0)|round(1) }}mg</strong><small>Iron</small></div>
-                            <div class="food-card-stat"><strong>{{ food.calcium_mg|default(0)|round(0) }}mg</strong><small>Calcium</small></div>
-                        </div>
-                    </div>
-                </article>
-                {% endfor %}
-            </div>
+            <div class="foods-grid" id="foodsGrid"></div>
         </section>
 
         <section class="explanation-section fade-in">
@@ -153,25 +78,19 @@
             </div>
             <div class="explanation-grid">
                 <article class="card explanation-card hover-card">
-                    <div class="explanation-icon">⚠️</div>
+                    <div class="explanation-icon"><i class="bi bi-exclamation-triangle"></i></div>
                     <h3>Dominant risk factors</h3>
-                    <p>{% if dominant_factors %}
-                        {% for factor in dominant_factors %}
-                            {{ factor.label }}{% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                    {% else %}
-                        Tidak ada faktor risiko dominan.
-                    {% endif %}</p>
+                    <p data-result="dominantSummary">Tidak ada data faktor risiko.</p>
                 </article>
                 <article class="card explanation-card hover-card">
-                    <div class="explanation-icon">🥗</div>
+                    <div class="explanation-icon"><i class="bi bi-basket2"></i></div>
                     <h3>Why these foods?</h3>
                     <p>Rekomendasi dipilih berdasarkan kebutuhan nutrisi ibu hamil: protein, serat, zat besi, kalsium, dan kontrol gula.</p>
                 </article>
                 <article class="card explanation-card hover-card recommendation-card">
-                    <div class="explanation-icon">🌸</div>
+                    <div class="explanation-icon"><i class="bi bi-flower1"></i></div>
                     <h3>Final recommendation</h3>
-                    <p>{{ final_recommendation }}</p>
+                    <p data-result="finalRecommendation">Isi form prediksi terlebih dahulu untuk melihat rekomendasi.</p>
                 </article>
             </div>
         </section>
@@ -194,6 +113,7 @@
         </div>
     </footer>
 
+    <script id="serverResultPayload" type="application/json">{{ result_payload|default({})|tojson|safe }}</script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="static/js/main.js"></script>
 </body>
