@@ -544,6 +544,18 @@ select {
     justify-content: space-between;
 }
 
+.factor-card {
+    position: relative;
+    justify-content: flex-start;
+    gap: 8px;
+    overflow: hidden;
+    background: linear-gradient(160deg, #ffffff 0%, #fff7fb 100%);
+}
+
+.factor-card .card-heading {
+    margin-bottom: 10px;
+}
+
 .risk-item {
     padding: 24px 26px;
     background: var(--surface);
@@ -608,26 +620,90 @@ select {
 
 .dominant-chart {
     display: grid;
-    gap: 18px;
-}
-
-.dominant-bar span {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--muted);
-    font-size: 0.95rem;
-}
-
-.dominant-bar strong {
-    display: block;
-    margin-bottom: 10px;
-    color: var(--text);
-    font-size: 1rem;
+    gap: 14px;
 }
 
 .dominant-bar {
+    --risk-color: #EC407A;
     display: grid;
-    gap: 10px;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid rgba(236, 64, 122, 0.14);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 16px 34px rgba(45, 55, 72, 0.06);
+}
+
+.dominant-bar:nth-child(2) {
+    --risk-color: #00A6A6;
+}
+
+.dominant-bar:nth-child(3) {
+    --risk-color: #F59E0B;
+}
+
+.dominant-bar:nth-child(4) {
+    --risk-color: #7C3AED;
+}
+
+.dominant-topline {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+}
+
+.dominant-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 15px;
+    background: color-mix(in srgb, var(--risk-color) 14%, white);
+    color: var(--risk-color);
+    font-size: 1.18rem;
+}
+
+.dominant-copy {
+    min-width: 0;
+}
+
+.dominant-copy span {
+    display: block;
+    color: var(--text);
+    font-size: 0.96rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.dominant-copy small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.dominant-bar strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 58px;
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--risk-color) 12%, white);
+    color: var(--risk-color);
+    font-size: 0.92rem;
+}
+
+.dominant-bar .progress-bar.slim {
+    height: 9px;
+    margin: 0;
+    background: rgba(45, 55, 72, 0.08);
+}
+
+.dominant-bar .progress-bar.slim span {
+    background: linear-gradient(90deg, var(--risk-color), color-mix(in srgb, var(--risk-color) 58%, white));
 }
 
 .dominant-list,

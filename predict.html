@@ -8,12 +8,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
     <header class="site-header fade-in">
         <div class="container header-inner">
-            <a class="brand" href="{{ url_for('index') }}">
+            <a class="brand" href="index.html">
                 <span class="brand-mark">P</span>
                 <div>
                     <strong>PregnaNutri</strong>
@@ -21,7 +21,7 @@
                 </div>
             </a>
             <nav class="nav-links">
-                <a href="{{ url_for('index') }}">Home</a>
+                <a href="index.html">Home</a>
             </nav>
         </div>
     </header>
@@ -52,64 +52,55 @@
                     <h2>Form kesehatan ibu</h2>
                 </div>
 
-                {% if errors %}
-                <div class="alert" role="alert">
-                    <strong>Mohon periksa kembali input Anda.</strong>
-                    <ul>
-                        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-
-                <form id="predictionForm" action="{{ url_for('predict') }}" method="post" class="patient-form">
+                <form id="predictionForm" action="/predict" method="post" class="patient-form">
                     <div class="grid-2-cols">
                         <label>
                             <span>Age</span>
-                            <input type="number" name="Age" min="10" max="60" step="1" placeholder="Contoh: 36" required value="{{ values.get('Age', '') }}">
+                            <input type="number" name="Age" min="10" max="60" step="1" placeholder="Contoh: 36" required>
                             <small>Rentang 10-60 tahun</small>
                         </label>
                         <label>
                             <span>Systolic BP</span>
-                            <input type="number" name="SystolicBP" min="60" max="220" step="1" placeholder="Contoh: 145" required value="{{ values.get('SystolicBP', '') }}">
+                            <input type="number" name="SystolicBP" min="60" max="220" step="1" placeholder="Contoh: 145" required>
                             <small>Tekanan darah sistolik</small>
                         </label>
                     </div>
                     <div class="grid-2-cols">
                         <label>
                             <span>Diastolic BP</span>
-                            <input type="number" name="DiastolicBP" min="40" max="140" step="1" placeholder="Contoh: 92" required value="{{ values.get('DiastolicBP', '') }}">
+                            <input type="number" name="DiastolicBP" min="40" max="140" step="1" placeholder="Contoh: 92" required>
                             <small>Tekanan darah diastolik</small>
                         </label>
                         <label>
                             <span>Blood Sugar</span>
-                            <input type="number" name="BS" min="0" max="30" step="0.1" placeholder="Contoh: 8.5" required value="{{ values.get('BS', '') }}">
+                            <input type="number" name="BS" min="0" max="30" step="0.1" placeholder="Contoh: 8.5" required>
                             <small>Gula darah dalam mmol/L</small>
                         </label>
                     </div>
                     <div class="grid-2-cols">
                         <label>
                             <span>Body Temperature</span>
-                            <input type="number" name="BodyTemp" min="90" max="110" step="0.1" placeholder="Contoh: 99" required value="{{ values.get('BodyTemp', '') }}">
+                            <input type="number" name="BodyTemp" min="90" max="110" step="0.1" placeholder="Contoh: 99" required>
                             <small>Suhu tubuh (°F)</small>
                         </label>
                         <label>
                             <span>BMI</span>
-                            <input type="number" name="BMI" min="10" max="60" step="0.1" placeholder="Contoh: 31" required value="{{ values.get('BMI', '') }}">
+                            <input type="number" name="BMI" min="10" max="60" step="0.1" placeholder="Contoh: 31" required>
                             <small>Body Mass Index</small>
                         </label>
                     </div>
                     <div class="grid-2-cols">
                         <label>
                             <span>Heart Rate</span>
-                            <input type="number" name="HeartRate" min="30" max="180" step="1" placeholder="Contoh: 88" required value="{{ values.get('HeartRate', '') }}">
+                            <input type="number" name="HeartRate" min="30" max="180" step="1" placeholder="Contoh: 88" required>
                             <small>Denyut jantung per menit</small>
                         </label>
                         <label>
                             <span>Previous Complications</span>
                             <select name="PreviousComplications" required>
                                 <option value="">Pilih</option>
-                                <option value="0" {% if values.get('PreviousComplications') == '0' %}selected{% endif %}>Tidak</option>
-                                <option value="1" {% if values.get('PreviousComplications') == '1' %}selected{% endif %}>Ya</option>
+                                <option value="0">Tidak</option>
+                                <option value="1">Ya</option>
                             </select>
                             <small>Riwayat komplikasi kehamilan</small>
                         </label>
@@ -119,8 +110,8 @@
                             <span>Preexisting Diabetes</span>
                             <select name="PreexistingDiabetes" required>
                                 <option value="">Pilih</option>
-                                <option value="0" {% if values.get('PreexistingDiabetes') == '0' %}selected{% endif %}>Tidak</option>
-                                <option value="1" {% if values.get('PreexistingDiabetes') == '1' %}selected{% endif %}>Ya</option>
+                                <option value="0">Tidak</option>
+                                <option value="1">Ya</option>
                             </select>
                             <small>Diabetes sebelum hamil</small>
                         </label>
@@ -128,8 +119,8 @@
                             <span>Gestational Diabetes</span>
                             <select name="GestationalDiabetes" required>
                                 <option value="">Pilih</option>
-                                <option value="0" {% if values.get('GestationalDiabetes') == '0' %}selected{% endif %}>Tidak</option>
-                                <option value="1" {% if values.get('GestationalDiabetes') == '1' %}selected{% endif %}>Ya</option>
+                                <option value="0">Tidak</option>
+                                <option value="1">Ya</option>
                             </select>
                             <small>Diabetes gestasional</small>
                         </label>
@@ -139,8 +130,8 @@
                             <span>Mental Health Issue</span>
                             <select name="MentalHealth" required>
                                 <option value="">Pilih</option>
-                                <option value="0" {% if values.get('MentalHealth') == '0' %}selected{% endif %}>Tidak</option>
-                                <option value="1" {% if values.get('MentalHealth') == '1' %}selected{% endif %}>Ya</option>
+                                <option value="0">Tidak</option>
+                                <option value="1">Ya</option>
                             </select>
                             <small>Gangguan kesehatan mental</small>
                         </label>
@@ -164,6 +155,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="static/js/main.js"></script>
 </body>
 </html>

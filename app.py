@@ -52,7 +52,7 @@ CRITERIA_LABELS = {
     "calories": "Kalori",
 }
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=".")
 app.config["SECRET_KEY"] = "nutrimom-prototype"
 logging.basicConfig(level=logging.INFO)
 
@@ -484,9 +484,39 @@ def index():
     return render_template("index.html")
 
 
+@app.get("/index.html")
+def index_file_page():
+    return render_template("index.html")
+
+
 @app.get("/predict")
 def predict_page():
     return render_template("predict.html", errors=[], values={})
+
+
+@app.get("/predict.html")
+def predict_file_page():
+    return render_template("predict.html", errors=[], values={})
+
+
+@app.get("/result.html")
+def result_file_page():
+    return redirect(url_for("predict_file_page"))
+
+
+@app.get("/templates/index.html")
+def legacy_index_file_page():
+    return redirect(url_for("index"))
+
+
+@app.get("/templates/predict.html")
+def legacy_predict_file_page():
+    return redirect(url_for("predict_file_page"))
+
+
+@app.get("/templates/result.html")
+def legacy_result_file_page():
+    return redirect(url_for("predict_file_page"))
 
 
 @app.post("/predict")

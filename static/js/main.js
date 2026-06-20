@@ -4,6 +4,16 @@ const apiConfig = {
   timeout: 12000,
 };
 
+const flaskOrigin = "http://127.0.0.1:5000";
+
+const resolveBackendUrl = (path) => {
+  if (window.location.port === "5500") {
+    return `${flaskOrigin}${path}`;
+  }
+
+  return path;
+};
+
 const buildRequestBody = (form) => ({
   Age: Number(form.Age.value),
   SystolicBP: Number(form.SystolicBP.value),
@@ -19,7 +29,7 @@ const buildRequestBody = (form) => ({
 });
 
 const predictWithApi = async (payload) => {
-  const response = await fetch(apiConfig.endpoint, {
+  const response = await fetch(resolveBackendUrl(apiConfig.endpoint), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -77,9 +87,17 @@ const initFoodToggle = () => {
   });
 };
 
+const initPredictionForm = () => {
+  const form = document.querySelector("#predictionForm");
+  if (!form) return;
+
+  form.setAttribute("action", resolveBackendUrl("/predict"));
+};
+
 window.addEventListener("DOMContentLoaded", () => {
   initPageAnimations();
   initFoodToggle();
+  initPredictionForm();
 });
 
 window.PregnaNutriApi = {

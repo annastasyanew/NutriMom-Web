@@ -4,21 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PregnaNutri | Maternal Nutrition Dashboard</title>
-    <script>
-        if (window.location.port === "5500") {
-            window.location.replace("http://127.0.0.1:5000/");
-        }
-    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
     <header class="site-header fade-in">
         <div class="container header-inner">
-            <a class="brand" href="{{ url_for('index') }}">
+            <a class="brand" href="index.html">
                 <span class="brand-mark">P</span>
                 <div>
                     <strong>PregnaNutri</strong>
@@ -26,8 +21,8 @@
                 </div>
             </a>
             <nav class="nav-links">
-                <a href="{{ url_for('predict_page') }}">New Assessment</a>
-                <a href="{{ url_for('index') }}#features">Features</a>
+                <a href="predict.html">New Assessment</a>
+                <a href="index.html#features">Features</a>
             </nav>
         </div>
     </header>
@@ -42,7 +37,7 @@
                     </h1>
                     <p>Platform rekomendasi makanan sehat ibu hamil berbasis Artificial Intelligence, Fuzzy Logic, dan Multi-Criteria Decision Making.</p>
                     <div class="hero-actions">
-                        <a class="btn btn-primary" href="{{ url_for('predict_page') }}">Get Recommendation</a>
+                        <a class="btn btn-primary" href="predict.html">Get Recommendation</a>
                         <a class="btn btn-soft" href="#features">Explore Features</a>
                     </div>
                     <div class="hero-stats">
@@ -66,7 +61,7 @@
                         <h2>Smart nutrition planning</h2>
                         <p>Analisis risiko maternal dan rekomendasi makanan seimbang untuk mendukung kesehatan ibu dan janin.</p>
                     </div>
-                    <img src="{{ url_for('static', filename='images/hero-illustration.svg') }}" alt="Illustration maternal nutrition" class="hero-illustration">
+                    <img src="static/images/hero-illustration.svg" alt="Illustration maternal nutrition" class="hero-illustration">
                 </div>
             </div>
         </section>
@@ -129,7 +124,7 @@
                     <span class="eyebrow">Ready for insight?</span>
                     <h2>Mulai rekomendasi nutrisi yang lebih cerdas hari ini.</h2>
                 </div>
-                <a class="btn btn-primary" href="{{ url_for('predict_page') }}">Start Assessment</a>
+                <a class="btn btn-primary" href="predict.html">Start Assessment</a>
             </div>
         </section>
     </main>
@@ -145,6 +140,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="static/js/main.js"></script>
 </body>
 </html>

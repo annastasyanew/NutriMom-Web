@@ -1,0 +1,5 @@
+RewriteEngine On
+
+RewriteRule ^templates/index\.html$ /index.html [R=301,L]
+RewriteRule ^templates/predict\.html$ /predict.html [R=301,L]
+RewriteRule ^templates/result\.html$ /predict.html [R=301,L]
